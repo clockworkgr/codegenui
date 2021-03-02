@@ -27,7 +27,7 @@
 						<SpStatusAPI :showText="sidebarOpen" />
 						<SpStatusRPC :showText="sidebarOpen" />
 						<SpStatusWS :showText="sidebarOpen" />
-						<div class="sp-text">Build: v0.3.8</div>
+						<div class="sp-build sp-text">Build: v0.3.8</div>
 					</template>
 				</SpSidebar>
 			</template>
