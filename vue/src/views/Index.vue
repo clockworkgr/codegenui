@@ -20,13 +20,6 @@
 </style>
 <script>
 export default {
-	name: 'Index',
-
-	data() {
-		return {
-			showcaseDeleteId: '',
-			showcaseUpdateId: ''
-		}
-	}
+	name: 'Index'
 }
 </script>
