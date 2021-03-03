@@ -45,25 +45,25 @@ export default {
 	},
 	getters: {
 		getAllBalances: (state) => (params = {}) => {
-			return state.AllBalances[JSON.stringify(params)]?.balances ?? []
+			return state.AllBalances[JSON.stringify(params)] ?? {}
 		},
 		getBalance: (state) => (params = {}) => {
-			return state.Balance[JSON.stringify(params)]?.balance ?? {}
+			return state.Balance[JSON.stringify(params)] ?? {}
 		},
 		getTotalSupply: (state) => (params = {}) => {
-			return state.TotalSupply[JSON.stringify(params)]?.supply ?? []
+			return state.TotalSupply[JSON.stringify(params)] ?? {}
 		},
 		getSupplyOf: (state) => (params = {}) => {
-			return state.SupplyOf[JSON.stringify(params)]?.amount ?? {}
+			return state.SupplyOf[JSON.stringify(params)] ?? {}
 		},
 		getParams: (state) => (params = {}) => {
-			return state.Params[JSON.stringify(params)]?.params ?? {}
+			return state.Params[JSON.stringify(params)] ?? {}
 		},
 		getDenomsMetadata: (state) => (params = {}) => {
-			return state.DenomsMetadata[JSON.stringify(params)]?.metadatas ?? []
+			return state.DenomsMetadata[JSON.stringify(params)] ?? {}
 		},
 		getDenomMetadata: (state) => (params = {}) => {
-			return state.DenomMetadata[JSON.stringify(params)]?.metadata ?? {}
+			return state.DenomMetadata[JSON.stringify(params)] ?? {}
 		}
 	},
 	actions: {

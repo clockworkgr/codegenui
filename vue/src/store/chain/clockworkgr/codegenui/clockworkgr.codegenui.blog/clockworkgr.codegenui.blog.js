@@ -66,10 +66,10 @@ export default {
 	},
 	getters: {
 		getPost: (state) => (params = {}) => {
-			return state.Post[JSON.stringify(params)]?.Post ?? {}
+			return state.Post[JSON.stringify(params)] ?? {}
 		},
 		getPostAll: (state) => (params = {}) => {
-			return state.PostAll[JSON.stringify(params)]?.Post ?? []
+			return state.PostAll[JSON.stringify(params)] ?? {}
 		},
 		getTypeStructure: (state) => (type) => {
 			return state._Structure[type].fields
