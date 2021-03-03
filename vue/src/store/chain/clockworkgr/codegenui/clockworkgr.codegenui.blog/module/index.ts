@@ -2,15 +2,15 @@ import { coins, StdFee } from "@cosmjs/launchpad";
 import { SigningStargateClient } from "@cosmjs/stargate";
 import { Registry, OfflineSigner, EncodeObject, DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { Api } from "./rest";
-import { MsgUpdatePost } from "./types/blog/tx";
 import { MsgCreatePost } from "./types/blog/tx";
 import { MsgDeletePost } from "./types/blog/tx";
+import { MsgUpdatePost } from "./types/blog/tx";
 
 
 const types = [
-  ["/clockworkgr.codegenui.blog.MsgUpdatePost", MsgUpdatePost],
   ["/clockworkgr.codegenui.blog.MsgCreatePost", MsgCreatePost],
   ["/clockworkgr.codegenui.blog.MsgDeletePost", MsgDeletePost],
+  ["/clockworkgr.codegenui.blog.MsgUpdatePost", MsgUpdatePost],
   
 ];
 
@@ -37,9 +37,9 @@ const txClient = async (wallet: OfflineSigner, { addr: addr }: TxClientOptions =
 
   return {
     signAndBroadcast: (msgs: EncodeObject[], { fee: fee }: SignAndBroadcastOptions = { fee: defaultFee }) => client.signAndBroadcast(address, msgs, fee),
-    msgUpdatePost: (data: MsgUpdatePost): EncodeObject => ({ typeUrl: "/clockworkgr.codegenui.blog.MsgUpdatePost", value: data }),
     msgCreatePost: (data: MsgCreatePost): EncodeObject => ({ typeUrl: "/clockworkgr.codegenui.blog.MsgCreatePost", value: data }),
     msgDeletePost: (data: MsgDeletePost): EncodeObject => ({ typeUrl: "/clockworkgr.codegenui.blog.MsgDeletePost", value: data }),
+    msgUpdatePost: (data: MsgUpdatePost): EncodeObject => ({ typeUrl: "/clockworkgr.codegenui.blog.MsgUpdatePost", value: data }),
     
   };
 };

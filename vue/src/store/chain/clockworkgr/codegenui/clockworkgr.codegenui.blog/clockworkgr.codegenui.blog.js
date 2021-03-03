@@ -1,5 +1,16 @@
 import { txClient, queryClient } from './module'
 
+async function initTxClient(vuexGetters) {
+	return await txClient(vuexGetters['chain/common/wallet/signer'], {
+		addr: vuexGetters['chain/common/env/apiTendermint']
+	})
+}
+
+async function initQueryClient(vuexGetters) {
+	return await queryClient({
+		addr: vuexGetters['chain/common/env/apiCosmos']
+	})
+}
 const getDefaultState = () => {
 	return {
 		_Structure: {
@@ -43,11 +54,8 @@ export default {
 		RESET_STATE(state) {
 			Object.assign(state, getDefaultState())
 		},
-		POST(state, { queryParams, post }) {
-			state.Post[queryParams] = post
-		},
-		POST_ALL(state, { post }) {
-			state.PostAll = post
+		QUERY(state, { query, key, value }) {
+			state[query][JSON.stringify(key)] = value
 		},
 		SUBSCRIBE(state, subscription) {
 			state._Subscriptions.add(subscription)
@@ -57,15 +65,11 @@ export default {
 		}
 	},
 	getters: {
-		getPost: (state) => (id) => {
-			if (id != '' && state.Post['/' + id]) {
-				return state.Post['/' + id].Post
-			} else {
-				return {}
-			}
+		getPost: (state) => (params = {}) => {
+			return state.Post[JSON.stringify(params)]?.Post ?? {}
 		},
-		getPostAll: (state) => () => {
-			return state.PostAll.Post
+		getPostAll: (state) => (params = {}) => {
+			return state.PostAll[JSON.stringify(params)]?.Post ?? []
 		},
 		getTypeStructure: (state) => (type) => {
 			return state._Structure[type].fields
@@ -91,92 +95,44 @@ export default {
 		unsubscribe({ commit }, subscription) {
 			commit('UNSUBSCRIBE', subscription)
 		},
-		async QueryPost({ commit, rootGetters }, { id, subscribe = false }) {
+		async QueryPost({ commit, rootGetters }, { subscribe = false, ...key }) {
 			try {
-				const post = (
-					await (
-						await queryClient({
-							addr: rootGetters['chain/common/env/apiCosmos']
-						})
-					).queryPost(id)
-				).data
-				const queryParams = '/' + id
-				commit('POST', { queryParams, post })
-				if (subscribe) {
-					commit('SUBSCRIBE', {
-						action: 'QueryPost',
-						payload: { id }
-					})
-				}
+				const value = (await (await initQueryClient(rootGetters)).queryPost(key.id)).data
+				commit('QUERY', { query: 'Post', key, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryPost', payload: key })
 			} catch (e) {
 				console.log('Query Failed: API node unavailable')
 			}
 		},
-
-		async QueryPostAll({ commit, rootGetters }, { subscribe = false }) {
+		async QueryPostAll({ commit, rootGetters }, { subscribe = false, ...key }) {
 			try {
-				const post = (
-					await (
-						await queryClient({
-							addr: rootGetters['chain/common/env/apiCosmos']
-						})
-					).queryPostAll()
-				).data
-				commit('POST_ALL', { post })
-				if (subscribe) {
-					commit('SUBSCRIBE', {
-						action: 'QueryPostAll',
-						payload: {}
-					})
-				}
+				const value = (await (await initQueryClient(rootGetters)).queryPostAll()).data
+				commit('QUERY', { query: 'PostAll', key, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryPostAll', payload: key })
 			} catch (e) {
 				console.log('Query Failed: API node unavailable')
 			}
 		},
 		async MsgCreatePost({ rootGetters }, { value }) {
 			try {
-				const msg = await (
-					await txClient(rootGetters['chain/common/wallet/signer'], {
-						addr: rootGetters['chain/common/env/apiTendermint']
-					})
-				).msgCreatePost(value)
-				await (
-					await txClient(rootGetters['chain/common/wallet/signer'], {
-						addr: rootGetters['chain/common/env/apiTendermint']
-					})
-				).signAndBroadcast([msg])
+				const msg = await (await initTxClient(rootGetters)).msgCreatePost(value)
+				await (await initTxClient(rootGetters)).signAndBroadcast([msg])
 			} catch (e) {
 				throw 'Failed to broadcast transaction: ' + e
 			}
 		},
 		async MsgUpdatePost({ rootGetters }, { value }) {
 			try {
-				const msg = await (
-					await txClient(rootGetters['chain/common/wallet/signer'], {
-						addr: rootGetters['chain/common/env/apiTendermint']
-					})
-				).msgUpdatePost(value)
-				await (
-					await txClient(rootGetters['chain/common/wallet/signer'], {
-						addr: rootGetters['chain/common/env/apiTendermint']
-					})
-				).signAndBroadcast([msg])
+				const msg = await (await initTxClient(rootGetters)).msgUpdatePost(value)
+				await (await initTxClient(rootGetters)).signAndBroadcast([msg])
 			} catch (e) {
-				throw 'Failed to broadcast transaction: '
+				throw 'Failed to broadcast transaction: ' + e
 			}
 		},
 		async MsgDeletePost({ rootGetters }, { value }) {
 			try {
-				const msg = await (
-					await txClient(rootGetters['chain/common/wallet/signer'], {
-						addr: rootGetters['chain/common/env/apiTendermint']
-					})
-				).msgDeletePost(value)
-				await (
-					await txClient(rootGetters['chain/common/wallet/signer'], {
-						addr: rootGetters['chain/common/env/apiTendermint']
-					})
-				).signAndBroadcast([msg])
+				const msg = await (await initTxClient(rootGetters)).msgDeletePost(value)
+				await (await initTxClient(rootGetters)).signAndBroadcast([msg])
 			} catch (e) {
 				throw 'Failed to broadcast transaction: ' + e
 			}

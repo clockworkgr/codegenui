@@ -1,5 +1,16 @@
 import { queryClient, txClient } from './module'
 
+async function initTxClient(vuexGetters) {
+	return await txClient(vuexGetters['chain/common/wallet/signer'], {
+		addr: vuexGetters['chain/common/env/apiTendermint']
+	})
+}
+
+async function initQueryClient(vuexGetters) {
+	return await queryClient({
+		addr: vuexGetters['chain/common/env/apiCosmos']
+	})
+}
 const getDefaultState = () => {
 	return {
 		Balance: {},
@@ -22,26 +33,8 @@ export default {
 		RESET_STATE(state) {
 			Object.assign(state, getDefaultState())
 		},
-		BALANCE(state, { queryParams, balance }) {
-			state.Balance[queryParams] = balance
-		},
-		ALL_BALANCES(state, { queryParams, balances }) {
-			state.AllBalances[queryParams] = balances
-		},
-		TOTAL_SUPPLY(state, { supply }) {
-			state.TotalSupply = supply
-		},
-		SUPPLY_OF(state, { queryParams, amount }) {
-			state.SupplyOf[queryParams] = amount
-		},
-		PARAMS(state, { params }) {
-			state.Params = params
-		},
-		DENOMS_METADATA(state, { metadata }) {
-			state.DenomsMetadata = metadata
-		},
-		DENOM_METADATA(state, { queryParams, metadata }) {
-			state.DenomsMetadata[queryParams] = metadata
+		QUERY(state, { query, key, value }) {
+			state[query][JSON.stringify(key)] = value
 		},
 		SUBSCRIBE(state, subscription) {
 			state._Subscriptions.add(subscription)
@@ -51,42 +44,26 @@ export default {
 		}
 	},
 	getters: {
-		getAllBalances: (state) => (address) => {
-			if (address != '' && state.AllBalances['/' + address]) {
-				return state.AllBalances['/' + address].balances
-			} else {
-				return []
-			}
+		getAllBalances: (state) => (params = {}) => {
+			return state.AllBalances[JSON.stringify(params)]?.balances ?? []
 		},
-		getBalance: (state) => (address, denom) => {
-			if (address != '' && state.Balance['/' + address + '/' + denom]) {
-				return state.Balance['/' + address + '/' + denom].balance
-			} else {
-				return {}
-			}
+		getBalance: (state) => (params = {}) => {
+			return state.Balance[JSON.stringify(params)]?.balance ?? {}
 		},
-		getTotalSupply: (state) => () => {
-			return state.TotalSupply
+		getTotalSupply: (state) => (params = {}) => {
+			return state.TotalSupply[JSON.stringify(params)]?.supply ?? []
 		},
-		getSupplyOf: (state) => (denom) => {
-			if (denom != '' && state.SupplyOf['/' + denom]) {
-				return state.SupplyOf['/' + denom].amount
-			} else {
-				return {}
-			}
+		getSupplyOf: (state) => (params = {}) => {
+			return state.SupplyOf[JSON.stringify(params)]?.amount ?? {}
 		},
-		getParams: (state) => () => {
-			return state.Params
+		getParams: (state) => (params = {}) => {
+			return state.Params[JSON.stringify(params)]?.params ?? {}
 		},
-		getDenomsMetadata: (state) => () => {
-			return state.DenomsMetadata
+		getDenomsMetadata: (state) => (params = {}) => {
+			return state.DenomsMetadata[JSON.stringify(params)]?.metadatas ?? []
 		},
-		getDenomMetadata: (state) => (denom) => {
-			if (denom != '' && state.DenomMetadata['/' + denom]) {
-				return state.DenomMetadata['/' + denom].metadata
-			} else {
-				return {}
-			}
+		getDenomMetadata: (state) => (params = {}) => {
+			return state.DenomMetadata[JSON.stringify(params)]?.metadata ?? {}
 		}
 	},
 	actions: {
@@ -108,190 +85,81 @@ export default {
 		unsubscribe({ commit }, subscription) {
 			commit('UNSUBSCRIBE', subscription)
 		},
-		async QueryBalance(
-			{ commit, rootGetters },
-			{ address, denom, subscribe = false }
-		) {
+		async QueryBalance({ commit, rootGetters }, { subscribe = false, ...key }) {
 			try {
-				const balance = (
-					await (
-						await queryClient({
-							addr: rootGetters['chain/common/env/apiCosmos']
-						})
-					).queryBalance(address, denom)
-				).data
-				const queryParams = '/' + address + '/' + denom
-				commit('BALANCE', { queryParams, balance })
-				if (subscribe) {
-					commit('SUBSCRIBE', {
-						action: 'QueryBalance',
-						payload: { address, denom }
-					})
-				}
+				const value = (await (await initQueryClient(rootGetters)).queryBalance(key.address, key.denom)).data
+				commit('QUERY', { query: 'Balance', key, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryBalance', payload: key })
 			} catch (e) {
 				console.log('Query Failed: API node unavailable')
 			}
 		},
-		async QueryAllBalances(
-			{ commit, rootGetters },
-			{ address, subscribe = false }
-		) {
+		async QueryAllBalances({ commit, rootGetters }, { subscribe = false, ...key }) {
 			try {
-				const balances = (
-					await (
-						await queryClient({
-							addr: rootGetters['chain/common/env/apiCosmos']
-						})
-					).queryAllBalances(address)
-				).data
-				const queryParams = '/' + address
-				commit('ALL_BALANCES', { queryParams, balances })
-				if (subscribe) {
-					commit('UNSUBSCRIBE', {
-						action: 'QueryAllBalances',
-						payload: { address }
-					})
-				}
+				const value = (await (await initQueryClient(rootGetters)).queryAllBalances(key.address)).data
+				commit('QUERY', { query: 'AllBalances', key, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryAllBalances', payload: key })
 			} catch (e) {
 				console.log('Query Failed: API node unavailable')
 			}
 		},
-		async QueryTotalSupply({ commit, rootGetters }, { subscribe = false }) {
+		async QueryTotalSupply({ commit, rootGetters }, { subscribe = false, ...key }) {
 			try {
-				const supply = (
-					await (
-						await queryClient({
-							addr: rootGetters['chain/common/env/apiCosmos']
-						})
-					).queryTotalSupply()
-				).data
-				const queryParams = ''
-				commit('TOTAL_SUPPLY', { queryParams, supply })
-				if (subscribe) {
-					commit('SUBSCRIBE', {
-						action: 'QueryTotalSupply',
-						payload: null
-					})
-				}
+				const value = (await (await initQueryClient(rootGetters)).queryTotalSupply()).data
+				commit('QUERY', { query: 'TotalSupply', key, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'queryTotalSupply', payload: key })
 			} catch (e) {
 				console.log('Query Failed: API node unavailable')
 			}
 		},
-		async QuerySupplyOf({ commit, rootGetters }, { denom, subscribe = false }) {
+		async QuerySupplyOf({ commit, rootGetters }, { subscribe = false, ...key }) {
 			try {
-				const amount = (
-					await (
-						await queryClient({
-							addr: rootGetters['chain/common/env/apiCosmos']
-						})
-					).querySupplyOf(denom)
-				).data
-				const queryParams = '/' + denom
-				commit('SUPPLY_OF', { queryParams, amount })
-				if (subscribe) {
-					commit('SUBSCRIBE', {
-						action: 'QuerySupplyOf',
-						payload: { denom }
-					})
-				}
+				const value = (await (await initQueryClient(rootGetters)).querySupplyOf(key.denom)).data
+				commit('QUERY', { query: 'SupplyOf', key, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QuerySupplyOf', payload: key })
 			} catch (e) {
 				console.log('Query Failed: API node unavailable')
 			}
 		},
-		async QueryParams({ commit, rootGetters }, { subscribe = false }) {
+		async QueryParams({ commit, rootGetters }, { subscribe = false, ...key }) {
 			try {
-				const params = (
-					await (
-						await queryClient({
-							addr: rootGetters['chain/common/env/apiCosmos']
-						})
-					).queryParams()
-				).data
-				const queryParams = ''
-				commit('PARAMS', { queryParams, params })
-				if (subscribe) {
-					commit('SUBSCRIBE', {
-						action: 'QueryParams',
-						payload: null
-					})
-				}
+				const value = (await (await initQueryClient(rootGetters)).queryParams()).data
+				commit('QUERY', { query: 'Params', key, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryParams', payload: key })
 			} catch (e) {
 				console.log('Query Failed: API node unavailable')
 			}
 		},
-		async QueryDenomsMetadata({ commit, rootGetters }, { subscribe = false }) {
+		async QueryDenomsMetadata({ commit, rootGetters }, { subscribe = false, ...key }) {
 			try {
-				const metadatas = (
-					await (
-						await queryClient({
-							addr: rootGetters['chain/common/env/apiCosmos']
-						})
-					).queryDenomsMetadata()
-				).data
-				const queryParams = ''
-				commit('DENOMS_METADATA', { queryParams, metadatas })
-				if (subscribe) {
-					commit('SUBSCRIBE', {
-						action: 'QueryDenomsMetadata',
-						payload: null
-					})
-				}
+				const value = (await (await initQueryClient(rootGetters)).queryDenomsMetadata()).data
+				commit('QUERY', { query: 'DenomsMetadata', key, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryDenomsMetadata', payload: key })
 			} catch (e) {
 				console.log('Query Failed: API node unavailable')
 			}
 		},
-		async QueryDenomMetadata(
-			{ commit, rootGetters },
-			{ denom, subscribe = false }
-		) {
+		async QueryDenomMetadata({ commit, rootGetters }, { subscribe = false, ...key }) {
 			try {
-				const metadata = (
-					await (
-						await queryClient({
-							addr: rootGetters['chain/common/env/apiCosmos']
-						})
-					).queryDenomMetadata(denom)
-				).data
-				const queryParams = '/' + denom
-				commit('DENOM_METADATA', { queryParams, metadata })
-				if (subscribe) {
-					commit('SUBSCRIBE', {
-						action: 'QueryDenomMetadata',
-						payload: { denom }
-					})
-				}
+				const value = (await (await initQueryClient(rootGetters)).queryDenomMetadata(key.denom)).data
+				commit('QUERY', { query: 'DenomMetadata', key, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryDenomMetadata', payload: key })
 			} catch (e) {
 				console.log('Query Failed: API node unavailable')
 			}
 		},
 		async MsgSend({ rootGetters }, { value }) {
 			try {
-				const msg = await (
-					await txClient(rootGetters['chain/common/wallet/signer'], {
-						addr: rootGetters['chain/common/env/apiTendermint']
-					})
-				).msgSend(value)
-				await (
-					await txClient(rootGetters['chain/common/wallet/signer'], {
-						addr: rootGetters['chain/common/env/apiTendermint']
-					})
-				).signAndBroadcast([msg])
+				const msg = await (await initTxClient(rootGetters)).msgSend(value)
+				await (await initTxClient(rootGetters)).signAndBroadcast([msg])
 			} catch (e) {
 				throw 'Failed to broadcast transaction'
 			}
 		},
 		async MsgMultiSend({ rootGetters }, { value }) {
 			try {
-				const msg = await (
-					await txClient(rootGetters['chain/common/wallet/signer'], {
-						addr: rootGetters['chain/common/env/apiTendermint']
-					})
-				).msgMultiSend(value)
-				await (
-					await txClient(rootGetters['chain/common/wallet/signer'], {
-						addr: rootGetters['chain/common/env/apiTendermint']
-					})
-				).signAndBroadcast([msg])
+				const msg = await (await initTxClient(rootGetters)).msgMultiSend(value)
+				await (await initTxClient(rootGetters)).signAndBroadcast([msg])
 			} catch (e) {
 				throw 'Failed to broadcast transaction'
 			}
