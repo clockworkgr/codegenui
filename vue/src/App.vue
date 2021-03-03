@@ -3,21 +3,14 @@
 		<SpWallet ref="wallet" v-on:dropdown-opened="$refs.menu.closeDropdown()" />
 		<SpLayout>
 			<template v-slot:sidebar>
-				<SpSidebar
-					v-on:sidebar-open="sidebarOpen = true"
-					v-on:sidebar-close="sidebarOpen = false"
-				>
+				<SpSidebar v-on:sidebar-open="sidebarOpen = true" v-on:sidebar-close="sidebarOpen = false">
 					<template v-slot:header>
 						<SpLogo />
 					</template>
 					<template v-slot:default>
 						<SpLinkIcon link="/" text="Dashboard" icon="Dashboard" />
 						<SpLinkIcon link="/modules" text="Modules" icon="Modules" />
-						<SpLinkIcon
-							link="/transactions"
-							text="Transactions"
-							icon="Transactions"
-						/>
+						<SpLinkIcon link="/transactions" text="Transactions" icon="Transactions" />
 						<SpLinkIcon link="/types" text="Custom Type" icon="Form" />
 						<div class="sp-dash"></div>
 						<SpLinkIcon link="/settings" text="Settings" icon="Settings" />

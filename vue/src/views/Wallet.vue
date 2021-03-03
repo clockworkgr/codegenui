@@ -28,19 +28,9 @@
 							{{ '' + wallet.HDpath + account.pathIncrement }}
 						</td>
 						<td>
-							<label
-								:for="account.address + '_key'"
-								v-if="!viewTogglers[account.address]"
-								>Show Private Key?
-							</label>
-							<span v-if="viewTogglers[account.address]">
-								{{ pKeys[account.address] }} </span
-							><br />
-							<input
-								type="checkbox"
-								:id="account.address + '_key'"
-								v-model="viewTogglers[account.address]"
-							/>
+							<label :for="account.address + '_key'" v-if="!viewTogglers[account.address]">Show Private Key? </label>
+							<span v-if="viewTogglers[account.address]"> {{ pKeys[account.address] }} </span><br />
+							<input type="checkbox" :id="account.address + '_key'" v-model="viewTogglers[account.address]" />
 						</td>
 					</tr>
 				</tbody>
@@ -57,13 +47,7 @@
 import moment from 'moment'
 import { saveAs } from 'file-saver'
 import CryptoJS from 'crypto-js'
-import {
-	Bip39,
-	EnglishMnemonic,
-	stringToPath,
-	Slip10,
-	Slip10Curve
-} from '@cosmjs/crypto'
+import { Bip39, EnglishMnemonic, stringToPath, Slip10, Slip10Curve } from '@cosmjs/crypto'
 import { keyToWif } from '@starport/vuex'
 
 export default {
@@ -82,17 +66,12 @@ export default {
 	},
 	async created() {
 		for (let account of this.wallet.accounts) {
-			this.pKeys[account.address] = await this.getPrivateKey(
-				account.pathIncrement
-			)
+			this.pKeys[account.address] = await this.getPrivateKey(account.pathIncrement)
 		}
 	},
 	methods: {
 		downloadBackup() {
-			const backup = CryptoJS.AES.encrypt(
-				JSON.stringify(this.wallet),
-				this.wallet.password
-			)
+			const backup = CryptoJS.AES.encrypt(JSON.stringify(this.wallet), this.wallet.password)
 
 			const blob = new Blob([backup.toString()], {
 				type: 'application/octet-stream; charset=us-ascii'
@@ -103,18 +82,12 @@ export default {
 			const mnemonicChecked = new EnglishMnemonic(this.wallet.mnemonic)
 			return Bip39.mnemonicToSeed(mnemonicChecked).then((seed) => {
 				const hdPath = stringToPath(this.wallet.HDpath + pathIncrement)
-				const { privkey } = Slip10.derivePath(
-					Slip10Curve.Secp256k1,
-					seed,
-					hdPath
-				)
+				const { privkey } = Slip10.derivePath(Slip10Curve.Secp256k1, seed, hdPath)
 				return keyToWif(privkey)
 			})
 		},
 		backupName() {
-			return (
-				this.wallet.name + '_Backup_' + moment().format('YYYY-MM-DD') + '.bin'
-			)
+			return this.wallet.name + '_Backup_' + moment().format('YYYY-MM-DD') + '.bin'
 		}
 	}
 }

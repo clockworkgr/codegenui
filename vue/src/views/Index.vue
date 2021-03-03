@@ -3,10 +3,7 @@
 		<div class="container">
 			<SpLatestBlocks />
 			<!-- this line is used by starport scaffolding # 4 -->
-			<SpType
-				modulePath="clockworkgr/codegenui/clockworkgr.codegenui.blog"
-				moduleType="Post"
-			/>
+			<SpType modulePath="clockworkgr/codegenui/clockworkgr.codegenui.blog" moduleType="Post" />
 		</div>
 	</div>
 </template>

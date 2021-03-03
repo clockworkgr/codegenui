@@ -3,28 +3,14 @@
   "version": "0.1.12",
   "description": "A Vue 3 boilerplate project utilizing @starport/vue and @starport/vuex",
   "author": "Tendermint, Inc <hello@tendermint.com>",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tendermint/vue-template.git"
-  },
-  "homepage": "https://github.com/tendermint/vue-template",
-  "license": "Apache-2.0",
-  "licenses": [
-    {
-      "type": "Apache-2.0",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0"
-    }
-  ],
-  "main": "src/index.js",
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
+  "main": "src/index.js",
   "dependencies": {
     "@cosmjs/crypto": "^0.23.2",
     "@cosmjs/encoding": "^0.23.2",
@@ -47,10 +33,12 @@
     "@babel/node": "^7.13.0",
     "@vue/cli-plugin-babel": "^4.5.11",
     "@vue/cli-plugin-eslint": "^4.5.11",
+    "@vue/cli-plugin-unit-jest": "^4.5.11",
     "@vue/cli-plugin-vuex": "^4.5.11",
     "@vue/cli-service": "^4.5.11",
     "@vue/compiler-sfc": "^3.0.7",
     "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/test-utils": "^2.0.0-0",
     "babel-eslint": "^10.1.0",
     "eslint": "^7.21.0",
     "eslint-plugin-prettier": "^3.3.1",
@@ -58,6 +46,23 @@
     "node-sass": "^5.0.0",
     "prettier": "^2.2.1",
     "protobufjs": "^6.10.2",
-    "sass-loader": "^10.1.1"
+    "sass-loader": "^10.1.1",
+    "typescript": "~3.9.3",
+    "vue-jest": "^5.0.0-0"
+  },
+  "homepage": "https://github.com/tendermint/vue-template",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tendermint/vue-template.git"
   }
 }

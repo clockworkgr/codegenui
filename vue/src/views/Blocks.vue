@@ -68,13 +68,9 @@ export default {
 		page: async function (newPage) {
 			this.blocks = []
 			const chain = await axios.get(
-				this.$store.getters['chain/common/env/apiTendermint'] +
-					'/blockchain?minHeight=1&maxHeight=20'
+				this.$store.getters['chain/common/env/apiTendermint'] + '/blockchain?minHeight=1&maxHeight=20'
 			)
-			const lowest = parseInt(
-				chain.data.result.block_metas[chain.data.result.block_metas.length - 1]
-					.header.height
-			)
+			const lowest = parseInt(chain.data.result.block_metas[chain.data.result.block_metas.length - 1].header.height)
 
 			const highest = parseInt(chain.data.result.last_height)
 			this.pages = Math.ceil((highest - lowest + 1) / 20)
@@ -104,13 +100,9 @@ export default {
 	},
 	async mounted() {
 		const chain = await axios.get(
-			this.$store.getters['chain/common/env/apiTendermint'] +
-				'/blockchain?minHeight=1&maxHeight=20'
+			this.$store.getters['chain/common/env/apiTendermint'] + '/blockchain?minHeight=1&maxHeight=20'
 		)
-		const lowest = parseInt(
-			chain.data.result.block_metas[chain.data.result.block_metas.length - 1]
-				.header.height
-		)
+		const lowest = parseInt(chain.data.result.block_metas[chain.data.result.block_metas.length - 1].header.height)
 
 		const highest = parseInt(chain.data.result.last_height)
 		this.pages = Math.ceil((highest - lowest + 1) / 20)
