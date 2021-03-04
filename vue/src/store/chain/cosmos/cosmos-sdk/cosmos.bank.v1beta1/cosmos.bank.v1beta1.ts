@@ -1,7 +1,7 @@
 import { MutationTree, ActionTree, GetterTree } from 'vuex'
 import { queryClient, txClient } from './module'
 import { RootState } from '../../../../index'
-import { OfflineSigner } from '@cosmjs/proto-signing'
+
 async function initTxClient(vuexGetters) {
 	return await txClient(vuexGetters['chain/common/wallet/signer'], {
 		addr: vuexGetters['chain/common/env/apiTendermint']
