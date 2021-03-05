@@ -1,4 +1,17 @@
 import { txClient, queryClient } from './module'
+import { Post } from './module/types/blog/post'
+
+function getStructure(template) {
+	let structure = { fields: [] }
+	for (const [key, value] of Object.entries(template)) {
+		let field = {}
+		field.name = key
+		field.type = typeof value
+		structure.fields.push(field)
+	}
+	return structure
+}
+const postStructure = getStructure(Post.fromPartial({}))
 
 async function initTxClient(vuexGetters) {
 	return await txClient(vuexGetters['chain/common/wallet/signer'], {
@@ -14,30 +27,7 @@ async function initQueryClient(vuexGetters) {
 const getDefaultState = () => {
 	return {
 		_Structure: {
-			Post: {
-				fields: [
-					{
-						name: 'creator',
-						type: 'string'
-					},
-					{
-						name: 'id',
-						type: 'string'
-					},
-					{
-						name: 'title',
-						type: 'string'
-					},
-					{
-						name: 'body',
-						type: 'string'
-					},
-					{
-						name: 'votes',
-						type: 'int'
-					}
-				]
-			}
+			Post: postStructure
 		},
 		Post: {},
 		PostAll: {},
