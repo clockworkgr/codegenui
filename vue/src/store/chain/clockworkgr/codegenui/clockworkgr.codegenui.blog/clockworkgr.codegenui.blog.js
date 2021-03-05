@@ -1,4 +1,6 @@
 import { txClient, queryClient } from './module'
+import { SpVuexError } from '@starport/vuex'
+
 import { Post } from './module/types/blog/post'
 
 function getStructure(template) {
@@ -67,7 +69,6 @@ export default {
 	},
 	actions: {
 		init({ dispatch, rootGetters }) {
-			console.log('init')
 			if (rootGetters['chain/common/env/client']) {
 				rootGetters['chain/common/env/client'].on('newblock', () => {
 					dispatch('StoreUpdate')
@@ -91,7 +92,7 @@ export default {
 				commit('QUERY', { query: 'Post', key, value })
 				if (subscribe) commit('SUBSCRIBE', { action: 'QueryPost', payload: key })
 			} catch (e) {
-				console.log('Query Failed: API node unavailable')
+				console.error(new SpVuexError('QueryClient:QueryPost', 'API Node Unavailable. Could not perform query.'))
 			}
 		},
 		async QueryPostAll({ commit, rootGetters }, { subscribe = false, ...key }) {
@@ -100,7 +101,7 @@ export default {
 				commit('QUERY', { query: 'PostAll', key, value })
 				if (subscribe) commit('SUBSCRIBE', { action: 'QueryPostAll', payload: key })
 			} catch (e) {
-				console.log('Query Failed: API node unavailable')
+				console.error(new SpVuexError('QueryClient:QueryPostAll', 'API Node Unavailable. Could not perform query.'))
 			}
 		},
 		async MsgCreatePost({ rootGetters }, { value }) {

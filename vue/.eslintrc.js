@@ -16,17 +16,7 @@ module.exports = {
 	rules: {
 		'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
 		'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-		'vue/component-name-in-template-casing': ['error', 'PascalCase'],
-		'prettier/prettier': [
-			'warn',
-			{
-				trailingComma: 'none',
-				tabWidth: 2,
-				semi: false,
-				singleQuote: true,
-				printWidth: 120
-			}
-		]
+		'vue/component-name-in-template-casing': ['error', 'PascalCase']
 	},
 
 	overrides: [
